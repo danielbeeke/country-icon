@@ -1,6 +1,6 @@
 <?php
 
-$api_url = 'https://maps.google.com/maps/api/geocode/json?key=AIzaSyCVO_TF5jPc6xtt8wjMT5UBAe3RYvdUilI&components=country:The%20Netherlands&address=';
+$api_url = 'https://maps.google.com/maps/api/geocode/json?key=AIzaSyBbvfdgUmI8t8289qFA-_o5yw4har1F0g8&components=country:The%20Netherlands&address=';
 
 $postal_codes_geoms = json_decode(file_get_contents('postalcodes.json'), TRUE);
 
