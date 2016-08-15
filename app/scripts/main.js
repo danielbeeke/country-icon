@@ -10,7 +10,7 @@ fetch('compressed.data')
 });
 
 function decompressPostalCodes(rawData) {
-    var rows = rawData.split("\n");
+    var rows = rawData.split('\n');
     var postalCode = parseInt(999);
 
     var postalCodes = {};
