@@ -70,4 +70,76 @@ function download_missing($key) {
     }
 }
 
+function create_compressed_file() {
+    $postal_codes_geoms = json_decode(file_get_contents('postalcodes.json'), TRUE);
+    $rows = [];
+
+    $smallest_lat = 50.7599552; // 0%
+    $biggest_lat = 53.4944646; // 100%
+
+    $smallest_lng = 3.3933198; // 0%
+    $biggest_lng = 7.1928279; // 100%
+
+    $empty_counter = 0;
+
+    foreach ($postal_codes_geoms as $postal_code => $geom) {
+        if ($geom['lat'] != 52.132633 && $geom['lng'] != 5.291266) {
+            if ($empty_counter) {
+                $rows[] = $empty_counter;
+                $empty_counter = 0;
+            }
+
+            $lat_percentage = ($geom['lat'] - $smallest_lat) / (($biggest_lat - $smallest_lat) / 100);
+            $lng_percentage = ($geom['lng'] - $smallest_lng) / (($biggest_lng - $smallest_lng) / 100);
+
+            $rows[] = round($lat_percentage, 2) . ',' . round($lng_percentage, 2);
+        }
+        else {
+            $empty_counter++;
+        }
+
+//        if ($postal_code == 3815) {
+//            print round($lat_percentage, 2) . ',' . round($lng_percentage, 2) . "\n";
+//        }
+    }
+
+    $compressed_data = implode("\n", $rows);
+
+    file_put_contents('compressed.data', $compressed_data);
+}
+
+function create_reversed_tree() {
+    $raw_file = file_get_contents('compressed.data');
+    $reversed_tree = [];
+
+    $rows = explode("\n", $raw_file);
+
+    foreach ($rows as $row) {
+        $row_parts = explode(',', $row);
+
+        foreach ($row_parts as $row_part) {
+            for ($i = 1; $i <= strlen($row_part) + 1; $i++) {
+                if (strlen(substr($row_part, 0, $i)) > 2) {
+                    $reversed_tree[substr($row_part, 0, $i)] = substr_count($raw_file, substr($row_part, 0, $i));
+                }
+            }
+        }
+    }
+
+    $compress_characters = 'abcdefghijklmnopqrstuvwxyzAVCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+    asort($reversed_tree);
+    $reversed_tree_sorted = array_reverse($reversed_tree);
+
+    $reversed_tree_sorted_keys = array_keys($reversed_tree_sorted);
+
+    foreach (str_split($compress_characters) as $delta => $letter) {
+        $raw_file = str_replace($reversed_tree_sorted[$reversed_tree_sorted_keys[$delta]], $letter, $raw_file);
+    }
+
+    file_put_contents('more-compressed.data', $raw_file);
+}
+
 //$argv[1];
+
+create_compressed_file();
